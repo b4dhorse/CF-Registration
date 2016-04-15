@@ -1,0 +1,23 @@
+CREATE TABLE `registrations` (
+  `registration_id` int(11) NOT NULL AUTO_INCREMENT,
+  `registration_type` varchar(255) DEFAULT NULL,
+  `registration_fname` varchar(150) NOT NULL,
+  `registration_lname` varchar(150) NOT NULL,
+  `registration_organization` text,
+  `registration_address1` varchar(150) DEFAULT NULL,
+  `registration_address2` varchar(255) DEFAULT NULL,
+  `registration_fax` varchar(100) DEFAULT NULL,
+  `registration_email` varchar(100) DEFAULT NULL,
+  `registration_phone` varchar(100) DEFAULT NULL,
+  `registration_phoneext` varchar(100) DEFAULT NULL,
+  `registration_city` varchar(150) DEFAULT NULL,
+  `registration_state` varchar(50) DEFAULT NULL,
+  `registration_zip` varchar(25) DEFAULT NULL,
+  `registration_title` varchar(150) DEFAULT NULL,
+  `registration_filename` varchar(255) DEFAULT NULL,
+  `registration_description` text,
+  `registration_dateadded` datetime DEFAULT NULL,
+  `registration_lastupdated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `registration_deleted` tinyint(4) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`registration_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
