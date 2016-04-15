@@ -1,13 +1,7 @@
-<!---
-Author: Brandon Smith
-Description: One page registration system for CF.
---->
-
 <!--- URL.view controls the switch statement --->
 <cfparam name="url.view" default="register" />
 
 <cfinclude template="header.cfm" />
-
 
 <!--- switch based on what needs to be displayed --->
 <cfswitch expression="#url.view#">

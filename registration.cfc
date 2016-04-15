@@ -1,8 +1,3 @@
-<!---
-Author: Brandon Smith
-Description:	
---->
-
 <cfcomponent>	
 	<!--- Trim form --->
 	<cffunction name="trimForm" access="public" returntype="void" output="no">
