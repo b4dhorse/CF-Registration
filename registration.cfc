@@ -1,3 +1,6 @@
+<!---
+	Functions for registration
+--->
 <cfcomponent>	
 	<!--- Trim form --->
 	<cffunction name="trimForm" access="public" returntype="void" output="no">
