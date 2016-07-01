@@ -2,6 +2,92 @@
 	Functions for registration
 --->
 <cfcomponent>	
+	<cffunction name="getRegistration" access="public" returnType="query" output="no">
+		<cfargument name="id" type="numeric" required="false" default="0" />
+		<cfargument name="hash" type="string" required="false" default="0" />
+		<cfquery name="registration" dataSource="#session.ds#">
+			SELECT * FROM registrations
+			WHERE 1 = 1
+			AND registration_deleted = 0
+			<cfif arguments.id neq 0>
+				AND registration_id = #arguments.id#
+			</cfif>
+			<cfif arguments.hash neq 0>
+				AND registration_hash = '#arguments.hash#'
+			</cfif>		
+		</cfquery>
+		<cfreturn registration />
+	</cffunction>
+	
+	<cffunction name="cancelRegistration" access="public" returnType="void" output="no">
+		<cfargument name="hash" required="true" />
+		<cfquery name="cancel" dataSource="#session.ds#">
+		UPDATE registrations
+		SET registration_deleted = 1,
+		registration_lastupdated = now()
+		WHERE registration_hash = '#arguments.hash#'
+		</cfquery>
+	</cffunction>
+	
+	<cffunction name="getTotals" access="public" returnType="query" output="no">
+		<cfargument name="event" required="true" />
+		<cfquery name="totals" dataSource="#session.ds#">
+			SELECT count(registration_id) as totalreg from registrations WHERE registration_eventid = #arguments.event# and registration_deleted = 0
+		</cfquery>
+		<cfreturn totals />
+	</cffunction>
+	
+	<cffunction name="getConfirmation" access="public" returnType="string" output="no">
+		<cfargument name="hash" type="string" required="true" />
+		<cfset confirmation = "" />
+		<cfsavecontent variable="confirmation"><cfinclude template="confirmation.cfm" /></cfsavecontent>
+		<cfreturn confirmation />
+	</cffunction>
+	
+	<cffunction name="sendConfirmation" access="public" returnType="void" output="no">
+		<cfargument name="hash" type="string" required="true" />
+		<cfset registration = getRegistration(0,arguments.hash) />
+		
+		<!--- send confirmation email --->
+		<cfmail to="#registration.registration_email#" from="Your Name <your.name@yourname.com>" subject="Registration Confirmation" type="html">
+		<html>
+		<body>
+		<table width="650" align="center" border="0" cellspacing="0" cellpadding="0" class="container" bgcolor="##DDDDDDD">
+			<tbody>
+				<tr>
+					<tr>
+						<td height="10">&nbsp;</td>
+					</tr>
+					<td valign="top"> 
+					<table width="625" align="center" border="0" cellspacing="0" cellpadding="0" class="row" bgcolor="##FFFFFF">
+						<tbody>
+							<tr>
+								<td height="10">&nbsp;</td>
+							</tr>
+							<tr>
+								<td style="font-size: 14px; line-height: 22px; font-family: Arial, Tahoma, Helvetica, sans-serif; color: ##666666; font-weight: 300; text-align: left; word-break: break-word;padding: 0 10px;"> 
+								<h1>
+									Registration Confirmation 
+								</h1>
+								<cfoutput>#getConfirmation(arguments.hash)#</cfoutput> </td>
+							</tr>
+							<tr>
+								<td height="10">&nbsp;</td>
+							</tr>
+						</tbody>
+					</table>
+					<tr>
+						<td height="10">&nbsp;</td>
+					</tr>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</body>
+		</html>
+		</cfmail>
+	</cffunction>
+
 	<!--- Trim form --->
 	<cffunction name="trimForm" access="public" returntype="void" output="no">
 		<cfloop collection="#form#" item="formVar">
@@ -148,5 +234,13 @@
 			</cfcase>
 		</cfswitch>
 		<cfreturn finalDay />
+	</cffunction>
+	
+	<cffunction name="getStates" returnType="query">
+		<cfquery name="states" dataSource="#session.ds#">
+		SELECT * FROM states
+		ORDER BY abbrv ASC			
+		</cfquery>
+		<cfreturn states />
 	</cffunction>
 </cfcomponent>

@@ -57,7 +57,7 @@
 					<div class="form-group">
 						<label class="col-sm-3 control-label" for="registration_title">Title</label>  
 						<div class="col-sm-6">
-							<input  name="registration_organization" id="registration_title" <cfif isdefined("SESSION.tmpformdata.registration_title")>value="#SESSION.tmpformdata.registration_title#"</cfif> type="text" placeholder="Title" class="form-control input-md">
+							<input  name="registration_title" id="registration_title" <cfif isdefined("SESSION.tmpformdata.registration_title")>value="#SESSION.tmpformdata.registration_title#"</cfif> type="text" placeholder="Title" class="form-control input-md">
 						
 						</div>
 					</div>
@@ -87,10 +87,15 @@
 					</div>
 					
 					<div class="form-group">
-						<label class="col-sm-3 control-label" for="registration_state">State</label>  
+						<label class="col-sm-4 control-label" for="registration_state">State</label>  
 						<div class="col-sm-6">
-							<input name="registration_state" id="registration_state" <cfif isdefined("SESSION.tmpformdata.registration_state")>value="#SESSION.tmpformdata.registration_state#"</cfif> type="text" placeholder="State" class="form-control input-md">
-						
+							<select name="registration_state" id="registration_state" required="">
+								<option label="Please select" ></option>
+								<cfloop query="#regObj.getStates()#">
+									<option <cfif isdefined("session.tmpformdata.registration_state") and session.tmpformdata.registration_state eq abbrv>selected="selected"</cfif> value="#abbrv#">#state#</option>
+								</cfloop>
+							</select>
+							<cfif listfind(URL.errors,"registration_state")><span class="label label-danger">State is required.</span></cfif>
 						</div>
 					</div>
 					
@@ -177,18 +182,25 @@
 		<!--- insert into database --->
 		<cfinsert dataSource="" tableName="registrations" />
 		
+		<!--- create hash --->
+		<cfquery name="reg" dataSource="#session.ds#">
+		SELECT * FROM registrations
+		WHERE registration_id = (select max(registration_id) from nih_registrations)
+		</cfquery>
+
+		<cfquery name="update" dataSource="#session.ds#">
+		UPDATE registrations
+		SET registration_hash = md5('#reg.registration_id#')	
+		WHERE registration_id = #reg.registration_id#
+		</cfquery>
+		
+		<cfquery name="reghash" dataSource="#session.ds#">
+		SELECT registration_hash FROM registrations
+		WHERE registration_id = #reg.registration_id#			
+		</cfquery>
+		
 		<!--- send confirmation email --->
-		<cfmail to="#form.registration_email#" from="youremail@someaddress.com" subject="Registration Confirmation" type="html">
-		<html><body>
-			<div style="font-family: sans-serif;">
-			<h1>Registration Confirmation</h1>
-			<p>We are pleased to confirm your registration. We look forward to your participation in the event.</p>
-			<p>Thank you,<br />
-				Your Name
-			</p>
-			</div>
-			</p></body></html>
-		</cfmail>
+		<cfset registrationObj.sendConfirmation(reghash.registration_hash) />
 		
 		<!--- send to confirmation page --->
 		<cflocation url="?view=confirmation" addToken="false" />
